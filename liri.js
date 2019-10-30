@@ -32,7 +32,7 @@ const mySpotify = function() {
         function(err, data) {
             if (err) {
                 console.log("Error occured: " + err);
-                return:
+                return;
             }
             var trackInfo = data.tracks.items
             if (trackInfo.length > 0) {

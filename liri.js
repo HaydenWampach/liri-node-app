@@ -1,16 +1,19 @@
-// linking to dot.env
+//linking to dot.env
 const env = require('dotenv').config();
 
 //linking to keys.js
 const keys = require('./keys');
 
-//bandsintown
+//bandsintown 
 const Bandsintown = require('Bandsintown');
-const bands = keys.Bandsintown
+const bands = keys.bandsintown
 
-// spotify
+//Spotify
 const Spotify = require ('node-spotify-api');
-const Spotify = new Spotify(keys.spotify);
+const spotify = new Spotify(keys.spotify);
+
+//require the .txt file to write to
+const fs = require('fs');
 
 //require the axios npm package
 const axios = require('axios')
@@ -19,54 +22,60 @@ const axios = require('axios')
 const Omdb = require('omdb');
 let userCommand = process.argv[2];
 
-//soring everything after usercommand as the user input/entry
-let userEntry = proces.argv.slice(3).join(' ')
+//storing everything after userCommand as the user input/entry
+let userEntry = process.argv.slice(3).join(' ')
 
 let moment = require("moment");
 
 const mySpotify = function() {
     // console.log(songName);
-    spotify.search({
-        type: 'track',
-        queary: userEntry },
+    
+    spotify.search({ 
+        type: 'track', 
+        query: userEntry }, 
         function(err, data) {
-            if (err) {
-                console.log("Error occured: " + err);
-                return;
-            }
-            var trackInfo = data.tracks.items
-            if (trackInfo.length > 0) {
-                //loop through all the track info array
-                for (var i = 0; i < trackInfo.length; i++) {
-                    //store album object as var
-                    let albumObject = trackInfo[i].album;
-                    let preview = trackInfo[i].preview_url
-                    //artist name from spotify api based off search
-                    let artist = albumObject.artists
-                    let albumName = albumObject.name;
-                    // loop through all of the artist array
-                    for (var j = 0; j < artist.length; j++) {
-
-                        //logging data to console
-                        console.log('\nAtrist: ' + artist[j].name)
-                        console.log('Song Name: ' + userEntry.toUpperCase())
-                        console.log('Preview of Song: ' + preview)
-                        console.log('Album Name: ' + albumName);
-                        console.log('---------------\n')
-                    }
+        if (err) {
+            console.log('Error occurred: ' + err);
+            return;
+        } 
+        var trackInfo = data.tracks.items
+        if (trackInfo.length > 0) {
+            //Loop through all the track information array
+            for (var i = 0; i < trackInfo.length; i++) {
+                //Store album object as var
+                let albumObject = trackInfo[i].album;
+                let preview = trackInfo[i].preview_url
+                //Artist name from spotify api based off search
+                let artist = albumObject.artists
+                let albumName = albumObject.name;
+                //Loop through all of the artist array
+                for (var j = 0; j < artist.length; j++) {
+                    
+                    //logging data to console
+                    console.log('\nArtist: ' + artist[j].name)
+                    console.log('Song Name: ' + userEntry.toUpperCase())
+                    console.log('Preview of Song: ' + preview)
+                    console.log('Album Name: ' + albumName);
+                    console.log('----------------\n')
+    
                 }
-            } else {
-                // if the user entry isnt a valid song
-                console.log('Sorry, no information found for "' + userEntry + '" song');
             }
-        
+        } else {
+            //if the user entry isn't a valid song
+            console.log('Sorry, no information found for "' + userEntry + '" song');
+        }
     });
 }
 const myBandsintown = function(response) {
     //env app key from .env
     let appKey = 'codingbootcamp'
+    //formatting the user response and accounting for special char
+    response = response.replace(/\s/g, '%20');
+    response = response.replace(/\//g, '%252F');
+    response = response.replace(/\?/g, '%253F');
+    response = response.replace(/\*/g, '%252A');
+    // response = queryParam.replace(/\"/g, "%27C"); 
     let url = 'https://rest.bandsintown.com/artists/' + userEntry + '/events?app_id=' + appKey;
-
     axios.get(url)
         .then(
         function(response) {
@@ -118,8 +127,6 @@ const myOmdb = function(response) {
         if (response.data.length != 0) {
             
             let jsonData = response.data;
-            
-
             
             // translate each data variable into an array
             let movieData = [
@@ -201,6 +208,7 @@ function mySwitch(userCommand) {
 
         default: 
             return console.log('\nI don\'t know "' + userCommand + '" as a command.\n');
+        
     };
 }
 mySwitch(userCommand);
